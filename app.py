@@ -3,15 +3,18 @@ import mysql.connector
 import pandas as pd
 import webbrowser
 
+# 1. إعدادات الصفحة الأساسية
 st.set_page_config(
     page_title="CarVilla Rental System",
     page_icon="🚗",
     layout="wide"
 )
+
+# 2. دالة الاتصال بقاعدة البيانات (تأكد من إعداد secrets.toml)
 def get_db_connection():
     return mysql.connector.connect(
-        host="viaduct.proxy.rlwy.net",
-        port=29799,
+        host="viaduct.proxy.rlwy.net", # العنوان الداخلي أسرع داخل ريلواي
+        port=29799,                     # البورت الداخلي الافتراضي
         user="root",
         password="juAAbLmPALSFqYtiHHGwKCyZyapVRAyA",
         database="railway"
@@ -111,3 +114,4 @@ with st.sidebar.form("new_reservation"):
             st.sidebar.success("تم التحديث في قاعدة البيانات بنجاح!")
             st.rerun()
         except Exception as e:
+            st.sidebar.error(f"حدث خطأ: {e}")
