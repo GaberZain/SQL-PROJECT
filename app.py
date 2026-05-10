@@ -1,7 +1,6 @@
 import streamlit as st
 import mysql.connector
 import pandas as pd
-import webbrowser
 
 # 1. إعدادات الصفحة الأساسية
 st.set_page_config(
@@ -10,11 +9,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. دالة الاتصال بقاعدة البيانات (تأكد من إعداد secrets.toml)
+# 2. دالة الاتصال بقاعدة البيانات (البيانات الخارجية)
 def get_db_connection():
     return mysql.connector.connect(
-        host="viaduct.proxy.rlwy.net", 
-        port=29799,                    
+        host="viaduct.proxy.rlwy.net",
+        port=29799,
         user="root",
         password="juAAbLmPALSFqYtiHHGwKCyZyapVRAyA",
         database="railway"
@@ -24,79 +23,78 @@ def get_db_connection():
 st.title("🚗 نظام CarVilla لإدارة تأجير السيارات")
 st.markdown("---")
 
-# إنشاء تبويبات (Tabs) لتنظيم الموقع بشكل احترافي
 tab1, tab2, tab3, tab4 = st.tabs(["🚀 السيارات المتاحة", "👥 العملاء", "📅 سجل الحجوزات", "📊 التقارير المالية"])
 
-# --- التبويب الأول: السيارات المتاحة ---
 with tab1:
     st.header("قائمة السيارات المتاحة للإيجار")
-    conn = get_db_connection()
-    # تنفيذ استعلام الـ SQL المكتوب في ملفك
-    query_cars = "SELECT car_id, model, brand, year, price, color FROM cars WHERE status = 'Available'"
-    df_cars = pd.read_sql(query_cars, conn)
-    
-    if not df_cars.empty:
-        # عرض السيارات في شكل أعمدة (Columns) كبديل للـ CSS
-        cols = st.columns(2)
-        for index, row in df_cars.iterrows():
-            with cols[index % 2]:
-                with st.container(border=True): # إطار بسيط لكل سيارة
-                    st.subheader(f"{row['brand']} {row['model']}")
-                    st.write(f"📅 سنة الصنع: {row['year']}")
-                    st.write(f"🎨 اللون: {row['color']}")
-                    st.write(f"💰 السعر: **${row['price']:,}**")
-                    st.button(f"حجز {row['model']}", key=f"btn_{row['car_id']}")
-    else:
-        st.info("لا توجد سيارات متاحة حالياً.")
-    conn.close()
+    try:
+        conn = get_db_connection()
+        query_cars = "SELECT car_id, model, brand, year, price, color FROM cars WHERE status = 'Available'"
+        df_cars = pd.read_sql(query_cars, conn)
+        if not df_cars.empty:
+            cols = st.columns(2)
+            for index, row in df_cars.iterrows():
+                with cols[index % 2]:
+                    with st.container(border=True):
+                        st.subheader(f"{row['brand']} {row['model']}")
+                        st.write(f"📅 سنة الصنع: {row['year']}")
+                        st.write(f"🎨 اللون: {row['color']}")
+                        st.write(f"💰 السعر: **${row['price']:,}**")
+                        st.button(f"حجز {row['model']}", key=f"btn_{row['car_id']}")
+        else:
+            st.info("لا توجد سيارات متاحة حالياً.")
+        conn.close()
+    except Exception as e:
+        st.error(f"خطأ: {e}")
 
-# --- التبويب الثاني: العملاء ---
 with tab2:
     st.header("بيانات العملاء")
-    conn = get_db_connection()
-    df_customers = pd.read_sql("SELECT customer_name, phone, email, address FROM customers", conn)
-    st.table(df_customers) # عرض البيانات في جدول منظم
-    conn.close()
+    try:
+        conn = get_db_connection()
+        df_customers = pd.read_sql("SELECT customer_name, phone, email, address FROM customers", conn)
+        st.table(df_customers)
+        conn.close()
+    except Exception as e:
+        st.error(f"خطأ: {e}")
 
-# --- التبويب الثالث: الحجوزات (الربط بين الجداول) ---
 with tab3:
     st.header("الحجوزات المؤكدة")
-    conn = get_db_connection()
-    # نفس الكود اللي إنت كاتبه في SQL (Inner Join)
-    query_join = """
-    SELECT customers.customer_name as 'العميل',
-           cars.model as 'السيارة',
-           cars.brand as 'الماركة',
-           reservations.reservation_date as 'تاريخ الحجز',
-           reservations.amount as 'المبلغ'
-    FROM reservations
-    INNER JOIN customers ON reservations.customer_id = customers.customer_id
-    INNER JOIN cars ON reservations.car_id = cars.car_id;
-    """
-    df_res = pd.read_sql(query_join, conn)
-    st.dataframe(df_res, use_container_width=True)
-    conn.close()
+    try:
+        conn = get_db_connection()
+        query_join = """
+        SELECT customers.customer_name as 'العميل',
+               cars.model as 'السيارة',
+               cars.brand as 'الماركة',
+               reservations.reservation_date as 'تاريخ الحجز',
+               reservations.amount as 'المبلغ'
+        FROM reservations
+        INNER JOIN customers ON reservations.customer_id = customers.customer_id
+        INNER JOIN cars ON reservations.car_id = cars.car_id;
+        """
+        df_res = pd.read_sql(query_join, conn)
+        st.dataframe(df_res, use_container_width=True)
+        conn.close()
+    except Exception as e:
+        st.error(f"خطأ: {e}")
 
-# --- التبويب الرابع: التقارير المالية ---
 with tab4:
     st.header("إجمالي الإيرادات اليومية")
-    conn = get_db_connection()
-    # كود الـ Group By اللي إنت كتبته
-    query_report = """
-    SELECT reservation_date, SUM(amount) as total_daily_payments
-    FROM reservations
-    GROUP BY reservation_date;
-    """
-    df_report = pd.read_sql(query_report, conn)
-    
-    if not df_report.empty:
-        # عرض رسم بياني احترافي
-        st.bar_chart(df_report.set_index('reservation_date'))
-        st.write("ملخص المبالغ المحصلة:")
-        st.write(df_report)
-    conn.close()
+    try:
+        conn = get_db_connection()
+        query_report = """
+        SELECT reservation_date, SUM(amount) as total_daily_payments
+        FROM reservations
+        GROUP BY reservation_date;
+        """
+        df_report = pd.read_sql(query_report, conn)
+        if not df_report.empty:
+            st.bar_chart(df_report.set_index('reservation_date'))
+            st.write(df_report)
+        conn.close()
+    except Exception as e:
+        st.error(f"خطأ: {e}")
 
-# --- الشريط الجانبي لإضافة حجز (Sidebar) ---
+# --- الشريط الجانبي (صلحت لك المسافات هنا) ---
 st.sidebar.header("📝 تسجيل حجز جديد")
 with st.sidebar.form("new_reservation"):
     c_id = st.number_input("رقم العميل", min_value=1)
@@ -104,7 +102,8 @@ with st.sidebar.form("new_reservation"):
     date = st.date_input("تاريخ الحجز")
     amt = st.number_input("المبلغ المدفوع", min_value=0.0)
     
-   if st.form_submit_button("إضافة لـ SQL"):
+    # السطر ده دلوقت واخد المسافة الصح
+    if st.form_submit_button("إضافة لـ SQL"):
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
