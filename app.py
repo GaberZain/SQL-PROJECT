@@ -3,14 +3,11 @@ import mysql.connector
 import pandas as pd
 import webbrowser
 
-# 1. إعدادات الصفحة الأساسية
 st.set_page_config(
     page_title="CarVilla Rental System",
     page_icon="🚗",
     layout="wide"
 )
-
-# 2. دالة الاتصال بقاعدة البيانات (تأكد من إعداد secrets.toml)
 def get_db_connection():
     return mysql.connector.connect(
         host="viaduct.proxy.rlwy.net",
