@@ -16,7 +16,7 @@ def get_db_connection():
         port=29799,
         user="root",
         password="juAAbLmPALSFqYtiHHGwKCyZyapVRAyA",
-        database="railway"
+        database="car_rental"
     )
 
 # --- واجهة المستخدم ---
