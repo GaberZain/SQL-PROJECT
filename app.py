@@ -104,14 +104,14 @@ with st.sidebar.form("new_reservation"):
     date = st.date_input("تاريخ الحجز")
     amt = st.number_input("المبلغ المدفوع", min_value=0.0)
     
-    if st.form_submit_button("إضافة لـ SQL"):
+   if st.form_submit_button("إضافة لـ SQL"):
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("INSERT INTO reservations (customer_id, car_id, reservation_date, amount) VALUES (%s, %s, %s, %s)", (c_id, v_id, date, amt))
             conn.commit()
             conn.close()
-            st.sidebar.success("تم التحديث في قاعدة البيانات بنجاح!")
+            st.sidebar.success("تم الحجز بنجاح!")
             st.rerun()
         except Exception as e:
             st.sidebar.error(f"حدث خطأ: {e}")
