@@ -13,8 +13,8 @@ st.set_page_config(
 # 2. دالة الاتصال بقاعدة البيانات (تأكد من إعداد secrets.toml)
 def get_db_connection():
     return mysql.connector.connect(
-        host="viaduct.proxy.rlwy.net", # العنوان الداخلي أسرع داخل ريلواي
-        port=29799,                     # البورت الداخلي الافتراضي
+        host="viaduct.proxy.rlwy.net", 
+        port=29799,                    
         user="root",
         password="juAAbLmPALSFqYtiHHGwKCyZyapVRAyA",
         database="railway"
