@@ -1,5 +1,5 @@
 import streamlit as st
-import pymysql
+import mysql.connector
 import pandas as pd
 import webbrowser
 
