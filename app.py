@@ -13,11 +13,11 @@ st.set_page_config(
 # 2. دالة الاتصال بقاعدة البيانات (تأكد من إعداد secrets.toml)
 def get_db_connection():
     return mysql.connector.connect(
-        host=st.secrets["mysql"]["host"],
-        port=st.secrets["mysql"]["port"],
-        user=st.secrets["mysql"]["user"],
-        password=st.secrets["mysql"]["password"],
-        database=st.secrets["mysql"]["database"]
+        host="viaduct.proxy.rlwy.net",
+        port=29799,
+        user="root",
+        password="juAAbLmPALSFqYtiHHGwKCyZyapVRAyA",
+        database="railway"
     )
 
 # --- واجهة المستخدم ---
